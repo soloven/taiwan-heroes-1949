@@ -96,7 +96,6 @@ export const TopResourceBar: React.FC<TopResourceBarProps> = ({
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const autoMenuOpen = controlledAutoMenuOpen ?? internalAutoMenuOpen;
   const setAutoMenuOpen = (next: boolean | ((prev: boolean) => boolean)) => {
@@ -107,19 +106,6 @@ export const TopResourceBar: React.FC<TopResourceBarProps> = ({
       setInternalAutoMenuOpen(resolved);
     }
   };
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setSettingsOpen(false);
-        setConfirmReset(false);
-      }
-    };
-    if (settingsOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [settingsOpen]);
 
   const playerDistricts = DISTRICT_LIST.filter(
     (d) => state.districts[d.id]?.faction === 'player'
@@ -479,8 +465,8 @@ export const TopResourceBar: React.FC<TopResourceBarProps> = ({
               </span>
             </button>
 
-            {/* Settings / Save Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            {/* Settings / Save Button (Opens Centered Modal) */}
+            <div>
               <button
                 type="button"
                 onClick={() => {
@@ -493,134 +479,167 @@ export const TopResourceBar: React.FC<TopResourceBarProps> = ({
                 <Settings className="h-4 w-4" />
                 <span className="hidden lg:inline">存檔/設定</span>
               </button>
-
-              {settingsOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 z-[65]">
-                  <div className="parchment-panel rounded-xl p-2.5 shadow-2xl">
-                  <div className="px-2 py-1 text-[11px] font-semibold text-parchment-400 border-b border-parchment-400/20 mb-1.5 flex items-center gap-1.5">
-                    <Flame className="h-3.5 w-3.5 text-[#f5c969]" />
-                    <span>電腦 AI 難度即時調整</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1 mb-1.5 px-0.5">
-                    {DIFFICULTY_ORDER.map((d) => {
-                      const active = state.difficulty === d;
-                      return (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => {
-                            onSetDifficulty(d);
-                            onNotify(
-                              `已將電腦 AI 難度調整為【${DIFFICULTY_CONFIGS[d].label}】（${DIFFICULTY_CONFIGS[d].desc}）`,
-                              'info'
-                            );
-                          }}
-                          className={`rounded-lg border py-1 text-[11px] font-extrabold transition active:scale-95 ${
-                            active
-                              ? DIFFICULTY_SWITCHER_ACTIVE[d]
-                              : 'border-parchment-400/25 bg-indigoInk-950/80 text-parchment-200 hover:border-parchment-300/60 hover:bg-indigoInk-800'
-                          }`}
-                        >
-                          {DIFFICULTY_CONFIGS[d].label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="px-1.5 pb-2 mb-1.5 text-[10px] text-parchment-300/80 border-b border-parchment-400/20">
-                    {DIFFICULTY_CONFIGS[state.difficulty].desc}
-                  </div>
-
-                  <div className="px-2 py-1 text-[11px] font-semibold text-parchment-400 border-b border-parchment-400/20 mb-1">
-                    軍情存檔管理
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSettingsOpen(false);
-                      setConfirmReset(false);
-                      onReturnToMenu();
-                    }}
-                    className="mb-1 flex w-full items-center gap-2 rounded-lg border border-[#f5c969]/45 bg-gradient-to-r from-[#2c1b0e]/90 to-[#1f1612]/90 px-2.5 py-2 text-left text-xs font-extrabold text-[#fde68a] hover:border-[#f5c969]/80 hover:brightness-110 transition"
-                  >
-                    <Home className="h-3.5 w-3.5 text-[#f5c969] shrink-0" />
-                    切換模式 / 返回主選單
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSaveNow();
-                      onNotify('已手動保存進度至本機瀏覽器！', 'success');
-                      setSettingsOpen(false);
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-parchment-100 hover:bg-parchment-400/15 transition"
-                  >
-                    <Save className="h-3.5 w-3.5 text-jade-400" />
-                    手動存檔
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-parchment-100 hover:bg-parchment-400/15 transition"
-                  >
-                    <Download className="h-3.5 w-3.5 text-parchment-300" />
-                    匯出存檔 JSON
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSettingsOpen(false);
-                      setImportModalOpen(true);
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-parchment-100 hover:bg-parchment-400/15 transition"
-                  >
-                    <Upload className="h-3.5 w-3.5 text-sky-300" />
-                    匯入存檔 JSON
-                  </button>
-                  <div className="my-1 border-t border-parchment-400/20" />
-                  {!confirmReset ? (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmReset(true)}
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-vermilion-400 hover:bg-vermilion-500/15 transition"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      重新開始新局
-                    </button>
-                  ) : (
-                    <div className="rounded-lg bg-vermilion-800/40 border border-vermilion-400/50 p-2">
-                      <p className="text-[11px] text-parchment-100 mb-2">
-                        確定清空進度、重回台南起兵？
-                      </p>
-                      <div className="flex gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onResetGame();
-                            onNotify('已重啟新局，自府城安平再起！', 'info');
-                            setSettingsOpen(false);
-                            setConfirmReset(false);
-                          }}
-                          className="flex-1 rounded bg-vermilion-500 py-1 text-[11px] font-bold text-white hover:bg-vermilion-400"
-                        >
-                          確定重來
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmReset(false)}
-                          className="flex-1 rounded bg-indigoInk-800 py-1 text-[11px] text-parchment-200 hover:bg-indigoInk-700"
-                        >
-                          取消
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* Settings & Save Modal (Centered & Mobile-Friendly, Never Clipped) */}
+      {settingsOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm"
+          onClick={() => {
+            setSettingsOpen(false);
+            setConfirmReset(false);
+          }}
+        >
+          <div
+            className="parchment-panel jiannian-frame w-full max-w-sm max-h-[86vh] overflow-y-auto rounded-2xl p-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-parchment-400/25 pb-2.5 mb-3">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[#f5c969]" />
+                <h3 className="font-serif text-base font-black text-[#fef3c7]">
+                  存檔與系統設定
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setConfirmReset(false);
+                }}
+                className="rounded-lg p-1 text-parchment-300/80 hover:bg-white/10 hover:text-white transition"
+                aria-label="關閉"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="px-1 py-1 text-xs font-semibold text-parchment-400 mb-1.5 flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-[#f5c969]" />
+              <span>電腦 AI 難度即時調整</span>
+            </div>
+            <div className="grid grid-cols-4 gap-1.5 mb-1.5">
+              {DIFFICULTY_ORDER.map((d) => {
+                const active = state.difficulty === d;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => {
+                      onSetDifficulty(d);
+                      onNotify(
+                        `已將電腦 AI 難度調整為【${DIFFICULTY_CONFIGS[d].label}】（${DIFFICULTY_CONFIGS[d].desc}）`,
+                        'info'
+                      );
+                    }}
+                    className={`rounded-lg border py-2 text-xs font-extrabold transition active:scale-95 ${
+                      active
+                        ? DIFFICULTY_SWITCHER_ACTIVE[d]
+                        : 'border-parchment-400/25 bg-indigoInk-950/80 text-parchment-200 hover:border-parchment-300/60 hover:bg-indigoInk-800'
+                    }`}
+                  >
+                    {DIFFICULTY_CONFIGS[d].label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="px-1 pb-3 mb-3 text-[11px] text-parchment-300/80 border-b border-parchment-400/20">
+              {DIFFICULTY_CONFIGS[state.difficulty].desc}
+            </div>
+
+            <div className="px-1 py-1 text-xs font-semibold text-parchment-400 mb-1.5">
+              軍情存檔管理
+            </div>
+            <div className="space-y-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setConfirmReset(false);
+                  onReturnToMenu();
+                }}
+                className="flex w-full items-center gap-2 rounded-xl border border-[#f5c969]/45 bg-gradient-to-r from-[#2c1b0e]/90 to-[#1f1612]/90 px-3 py-2.5 text-left text-xs font-extrabold text-[#fde68a] hover:border-[#f5c969]/80 hover:brightness-110 transition"
+              >
+                <Home className="h-4 w-4 text-[#f5c969] shrink-0" />
+                切換模式 / 返回主選單
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSaveNow();
+                  onNotify('已手動保存進度至本機瀏覽器！', 'success');
+                  setSettingsOpen(false);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl border border-parchment-400/15 bg-indigoInk-950/75 px-3 py-2.5 text-left text-xs font-medium text-parchment-100 hover:bg-parchment-400/15 transition"
+              >
+                <Save className="h-4 w-4 text-jade-400" />
+                手動存檔
+              </button>
+              <button
+                type="button"
+                onClick={handleExport}
+                className="flex w-full items-center gap-2 rounded-xl border border-parchment-400/15 bg-indigoInk-950/75 px-3 py-2.5 text-left text-xs font-medium text-parchment-100 hover:bg-parchment-400/15 transition"
+              >
+                <Download className="h-4 w-4 text-parchment-300" />
+                匯出存檔 JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setImportModalOpen(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl border border-parchment-400/15 bg-indigoInk-950/75 px-3 py-2.5 text-left text-xs font-medium text-parchment-100 hover:bg-parchment-400/15 transition"
+              >
+                <Upload className="h-4 w-4 text-sky-300" />
+                匯入存檔 JSON
+              </button>
+            </div>
+
+            <div className="my-3 border-t border-parchment-400/20" />
+            {!confirmReset ? (
+              <button
+                type="button"
+                onClick={() => setConfirmReset(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-vermilion-500/35 bg-vermilion-950/40 px-3 py-2.5 text-xs font-bold text-vermilion-400 hover:bg-vermilion-500/20 transition"
+              >
+                <RotateCcw className="h-4 w-4" />
+                重新開始新局
+              </button>
+            ) : (
+              <div className="rounded-xl bg-vermilion-800/40 border border-vermilion-400/50 p-3">
+                <p className="text-xs text-parchment-100 mb-2.5">
+                  確定清空目前模式進度、重新開局？
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onResetGame();
+                      onNotify('已重啟新局！', 'info');
+                      setSettingsOpen(false);
+                      setConfirmReset(false);
+                    }}
+                    className="flex-1 rounded-lg bg-vermilion-500 py-2 text-xs font-bold text-white hover:bg-vermilion-400"
+                  >
+                    確定重來
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmReset(false)}
+                    className="flex-1 rounded-lg bg-indigoInk-800 py-2 text-xs text-parchment-200 hover:bg-indigoInk-700"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Auto Mode Settings Modal (Centered & Mobile-Friendly, Never Clipped) */}
       {autoMenuOpen && (
