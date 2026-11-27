@@ -1,0 +1,711 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Taiwan Temple Jiannian (剪黏) & Shadow-Puppet × Epic Oil-Canvas Fantasy Palette */
+  --tw-ink-deep: #090d14;
+  --tw-ink-sea: #0f1b28;
+  --tw-ink-teal: #14323c;
+  --tw-wood-mahogany: #1d120e;
+  --tw-wood-dark: #1b1410;
+  --tw-wood-warm: #2c1d15;
+  --tw-parchment-light: #fdf8ec;
+  --tw-parchment-mid: #e4c890;
+  --tw-parchment-gold: #d4aa5a;
+  --tw-gold-imperial: #f7cd6d;
+  --tw-gold-deep: #9c6f26;
+  --tw-lantern-amber: #f59e0b;
+  --tw-lantern-glow: #ffbe55;
+  --tw-jade-glow: #49a888;
+  --tw-jade-deep: #134739;
+  --tw-violet-mystic: #7c5cd6;
+  --tw-vermilion: #c83e2b;
+  --tw-vermilion-deep: #7f1d1d;
+  --tw-vermilion-bright: #e55b45;
+  --tw-bronze: #94724e;
+  --tw-slate-frame: #4c5a69;
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--tw-ink-deep);
+    color: var(--tw-parchment-light);
+    font-family: 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: 'Noto Serif TC', 'PMingLiU', Georgia, serif;
+  }
+
+  /* Custom subtle dark-gold temple scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 170, 90, 0.48) rgba(20, 14, 11, 0.62);
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(16, 12, 10, 0.7);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgba(247, 205, 109, 0.52) 0%,
+      rgba(156, 111, 38, 0.65) 100%
+    );
+    border-radius: 999px;
+    border: 1px solid rgba(12, 9, 7, 0.65);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 224, 138, 0.85) 0%,
+      rgba(200, 62, 43, 0.72) 100%
+    );
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* ============================================================
+   Keyframes — Core Ambient & Gacha
+   ============================================================ */
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pulseGold {
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px rgba(247, 205, 109, 0.3),
+      0 0 28px rgba(200, 62, 43, 0.16),
+      inset 0 0 12px rgba(247, 205, 109, 0.14);
+    border-color: rgba(247, 205, 109, 0.78);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 214, 112, 0.62),
+      0 0 42px rgba(200, 62, 43, 0.3),
+      inset 0 0 18px rgba(255, 216, 130, 0.28);
+    border-color: rgba(255, 236, 174, 0.98);
+  }
+}
+
+@keyframes gachaReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) translateY(22px) rotateX(18deg);
+    filter: brightness(2.1) blur(4px);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.04) translateY(-3px) rotateX(0deg);
+    filter: brightness(1.25) blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotateX(0deg);
+    filter: brightness(1) blur(0px);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.78;
+  }
+  55% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(240%) skewX(-22deg);
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   Keyframes — Army March & Siege Battle System
+   ============================================================ */
+
+@keyframes marchBob {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-4.5px) rotate(-3deg) scale(1.04, 0.97);
+  }
+  50% {
+    transform: translateY(0.5px) rotate(0deg) scale(0.98, 1.02);
+  }
+  75% {
+    transform: translateY(-4px) rotate(3deg) scale(1.04, 0.97);
+  }
+}
+
+@keyframes bannerWave {
+  0%,
+  100% {
+    transform: skewY(0deg) scaleX(1) rotate(0deg);
+  }
+  25% {
+    transform: skewY(-5deg) scaleX(0.94) rotate(-2deg);
+  }
+  50% {
+    transform: skewY(3deg) scaleX(1.04) rotate(1.5deg);
+  }
+  75% {
+    transform: skewY(-3deg) scaleX(0.97) rotate(-1deg);
+  }
+}
+
+@keyframes swordSlashA {
+  0% {
+    opacity: 0;
+    transform: translate(-22px, -22px) rotate(-38deg) scaleX(0.2);
+    filter: brightness(2.2);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(0px, 0px) rotate(-38deg) scaleX(1.15);
+    filter: brightness(1.6) drop-shadow(0 0 10px rgba(255, 226, 138, 0.9));
+  }
+  65% {
+    opacity: 0.85;
+    transform: translate(12px, 12px) rotate(-38deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(26px, 26px) rotate(-38deg) scaleX(0.5);
+    filter: brightness(1);
+  }
+}
+
+@keyframes swordSlashB {
+  0% {
+    opacity: 0;
+    transform: translate(22px, -22px) rotate(38deg) scaleX(0.2);
+    filter: brightness(2.2);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(0px, 0px) rotate(38deg) scaleX(1.15);
+    filter: brightness(1.6) drop-shadow(0 0 10px rgba(229, 91, 69, 0.9));
+  }
+  65% {
+    opacity: 0.85;
+    transform: translate(-12px, 12px) rotate(38deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-26px, 26px) rotate(38deg) scaleX(0.5);
+    filter: brightness(1);
+  }
+}
+
+@keyframes siegeShake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  15% {
+    transform: translate3d(-5px, -2px, 0) rotate(-1.2deg);
+  }
+  30% {
+    transform: translate3d(5px, 2px, 0) rotate(1.2deg);
+  }
+  45% {
+    transform: translate3d(-4px, 1px, 0) rotate(-0.8deg);
+  }
+  60% {
+    transform: translate3d(4px, -1px, 0) rotate(0.8deg);
+  }
+  75% {
+    transform: translate3d(-2px, 1px, 0) rotate(-0.4deg);
+  }
+  90% {
+    transform: translate3d(2px, 0, 0) rotate(0.3deg);
+  }
+}
+
+@keyframes conquestRipple {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.35);
+    box-shadow:
+      0 0 0 2px rgba(247, 205, 109, 0.9),
+      0 0 24px rgba(73, 168, 136, 0.75);
+  }
+  55% {
+    opacity: 0.65;
+    transform: scale(1.45);
+    box-shadow:
+      0 0 0 4px rgba(73, 168, 136, 0.55),
+      0 0 38px rgba(247, 205, 109, 0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.35);
+    box-shadow:
+      0 0 0 1px rgba(247, 205, 109, 0),
+      0 0 0 rgba(73, 168, 136, 0);
+  }
+}
+
+@keyframes floatDamage {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.75);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.16);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-18px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-42px) scale(0.92);
+  }
+}
+
+@keyframes cutinSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-115%) skewX(-12deg);
+    filter: brightness(1.6);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(3%) skewX(-6deg);
+    filter: brightness(1.15);
+  }
+  26% {
+    opacity: 1;
+    transform: translateX(0%) skewX(-4deg);
+    filter: brightness(1);
+  }
+  78% {
+    opacity: 1;
+    transform: translateX(0%) skewX(-4deg);
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(115%) skewX(-12deg);
+    filter: brightness(1.4);
+  }
+}
+
+@keyframes smokeRise {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) translateX(0px) scale(0.55);
+  }
+  22% {
+    opacity: 0.78;
+    transform: translateY(-10px) translateX(3px) scale(0.9);
+  }
+  65% {
+    opacity: 0.42;
+    transform: translateY(-28px) translateX(-4px) scale(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-48px) translateX(6px) scale(1.55);
+  }
+}
+
+/* ============================================================
+   Theme Surface & Card Polish Utilities
+   ============================================================ */
+
+@layer components {
+  /*
+   * Rich Dark-Mahogany Oil-Painted Panel with Double Temple Gold/Vermilion Trim,
+   * Warm Lantern Top-Edge Sheen & Subtle Parchment Grain
+   */
+  .parchment-panel {
+    position: relative;
+    background:
+      /* Warm temple lantern top-edge sheen */
+      radial-gradient(
+        90% 42% at 50% 0%,
+        rgba(255, 206, 118, 0.15) 0%,
+        rgba(245, 158, 11, 0.05) 45%,
+        transparent 75%
+      ),
+      /* Subtle vermilion incense ember glow at bottom corners */
+      radial-gradient(
+        85% 75% at 92% 100%,
+        rgba(200, 62, 43, 0.1) 0%,
+        transparent 62%
+      ),
+      radial-gradient(
+        75% 65% at 8% 100%,
+        rgba(156, 111, 38, 0.08) 0%,
+        transparent 58%
+      ),
+      /* Subtle woven parchment / oil-canvas cross-grain */
+      repeating-linear-gradient(
+        45deg,
+        rgba(253, 248, 236, 0.014) 0px,
+        rgba(253, 248, 236, 0.014) 1px,
+        transparent 1px,
+        transparent 5px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(212, 170, 90, 0.012) 0px,
+        rgba(212, 170, 90, 0.012) 1px,
+        transparent 1px,
+        transparent 6px
+      ),
+      /* Deep carved mahogany & aged oil-canvas base */
+      linear-gradient(
+        168deg,
+        rgba(42, 26, 20, 0.96) 0%,
+        rgba(27, 19, 17, 0.97) 44%,
+        rgba(18, 17, 22, 0.98) 100%
+      );
+    border: 1.5px solid rgba(212, 170, 90, 0.52);
+    box-shadow:
+      0 14px 34px rgba(5, 4, 6, 0.72),
+      0 2px 10px rgba(127, 29, 29, 0.22),
+      inset 0 1px 0 rgba(255, 232, 176, 0.28),
+      inset 0 0 0 1px rgba(200, 62, 43, 0.2),
+      inset 0 -20px 32px rgba(9, 6, 6, 0.52);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Inner double temple filigree trim */
+  .parchment-panel::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: inherit;
+    border: 1px solid rgba(247, 205, 109, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 220, 145, 0.1);
+    pointer-events: none;
+  }
+
+  /*
+   * Jiannian (台灣廟宇剪黏) Ceramic Mosaic Decorative Frame
+   * Ornate gold & vermilion corner accents for hero showcases, headers & modals
+   */
+  .jiannian-frame {
+    position: relative;
+    border: 1.5px solid rgba(247, 205, 109, 0.58);
+    box-shadow:
+      0 10px 28px rgba(6, 4, 6, 0.65),
+      inset 0 0 0 2px rgba(127, 29, 29, 0.45),
+      inset 0 0 0 3px rgba(247, 205, 109, 0.24),
+      inset 0 0 24px rgba(245, 158, 11, 0.1);
+  }
+
+  .jiannian-frame::before,
+  .jiannian-frame::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background-repeat: no-repeat;
+  }
+
+  /* Four ornate temple corner filigree brackets (gold outer + vermilion inner dots) */
+  .jiannian-frame::before {
+    background-image:
+      linear-gradient(to right, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to bottom, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to left, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to bottom, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to right, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to top, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to left, #f7cd6d 0%, #f7cd6d 100%),
+      linear-gradient(to top, #f7cd6d 0%, #f7cd6d 100%);
+    background-size:
+      14px 2.5px,
+      2.5px 14px,
+      14px 2.5px,
+      2.5px 14px,
+      14px 2.5px,
+      2.5px 14px,
+      14px 2.5px,
+      2.5px 14px;
+    background-position:
+      top left,
+      top left,
+      top right,
+      top right,
+      bottom left,
+      bottom left,
+      bottom right,
+      bottom right;
+  }
+
+  .jiannian-frame::after {
+    background-image:
+      radial-gradient(circle, #e55b45 0%, #e55b45 55%, transparent 65%),
+      radial-gradient(circle, #e55b45 0%, #e55b45 55%, transparent 65%),
+      radial-gradient(circle, #e55b45 0%, #e55b45 55%, transparent 65%),
+      radial-gradient(circle, #e55b45 0%, #e55b45 55%, transparent 65%);
+    background-size: 5px 5px;
+    background-position:
+      top 5px left 5px,
+      top 5px right 5px,
+      bottom 5px left 5px,
+      bottom 5px right 5px;
+  }
+
+  /* Warm Temple-Lantern Backlight Glow */
+  .lantern-glow {
+    position: relative;
+    box-shadow:
+      0 0 18px rgba(245, 158, 11, 0.32),
+      0 0 42px rgba(200, 62, 43, 0.2),
+      inset 0 0 22px rgba(255, 190, 85, 0.16);
+  }
+
+  .lantern-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at 50% 24%,
+      rgba(255, 206, 118, 0.24) 0%,
+      rgba(229, 91, 69, 0.08) 48%,
+      transparent 76%
+    );
+    pointer-events: none;
+  }
+
+  /* Deep indigo-teal ink wash sea background with subtle warm horizon */
+  .ink-ocean-bg {
+    background-color: var(--tw-ink-deep);
+    background-image:
+      radial-gradient(
+        circle at 22% 24%,
+        rgba(46, 139, 110, 0.18) 0%,
+        transparent 44%
+      ),
+      radial-gradient(
+        circle at 78% 72%,
+        rgba(20, 56, 74, 0.44) 0%,
+        transparent 52%
+      ),
+      radial-gradient(
+        ellipse at 52% 46%,
+        rgba(38, 66, 84, 0.36) 0%,
+        rgba(14, 24, 36, 0.74) 55%,
+        rgba(7, 11, 18, 0.97) 100%
+      ),
+      linear-gradient(
+        180deg,
+        #0d1824 0%,
+        #102331 38%,
+        #0c1926 72%,
+        #080f18 100%
+      );
+  }
+
+  /* SSR: Painterly Imperial Gold & Temple Vermilion Lacquer Metallic Border */
+  .ssr-card-glow {
+    position: relative;
+    overflow: hidden;
+    border: 1.5px solid rgba(247, 205, 109, 0.92);
+    background:
+      radial-gradient(
+        95% 65% at 50% 0%,
+        rgba(255, 204, 102, 0.22) 0%,
+        transparent 62%
+      ),
+      linear-gradient(
+        152deg,
+        rgba(72, 42, 18, 0.96) 0%,
+        rgba(39, 22, 17, 0.97) 52%,
+        rgba(58, 22, 18, 0.97) 100%
+      );
+    box-shadow:
+      0 8px 24px rgba(10, 5, 4, 0.65),
+      inset 0 1px 0 rgba(255, 240, 194, 0.45),
+      inset 0 0 0 2px rgba(200, 62, 43, 0.32);
+    animation: pulseGold 3.2s ease-in-out infinite;
+  }
+
+  .ssr-card-glow::after {
+    content: '';
+    position: absolute;
+    top: -15%;
+    left: 0;
+    width: 44%;
+    height: 130%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 241, 198, 0.08) 25%,
+      rgba(255, 232, 160, 0.38) 50%,
+      rgba(255, 241, 198, 0.08) 75%,
+      transparent 100%
+    );
+    pointer-events: none;
+    animation: shimmerSweep 3.8s ease-in-out infinite;
+  }
+
+  /* SR: Celadon Jade & Twilight Violet Oil-Paint Metallic Frame */
+  .sr-card-glow {
+    position: relative;
+    overflow: hidden;
+    border: 1.5px solid rgba(114, 198, 174, 0.78);
+    background:
+      radial-gradient(
+        95% 65% at 20% 0%,
+        rgba(73, 168, 136, 0.18) 0%,
+        transparent 58%
+      ),
+      radial-gradient(
+        90% 70% at 88% 100%,
+        rgba(124, 92, 214, 0.2) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        155deg,
+        rgba(22, 47, 48, 0.95) 0%,
+        rgba(22, 24, 41, 0.96) 54%,
+        rgba(41, 26, 58, 0.96) 100%
+      );
+    box-shadow:
+      0 6px 20px rgba(6, 10, 18, 0.6),
+      0 0 16px rgba(73, 168, 136, 0.28),
+      0 0 26px rgba(124, 92, 214, 0.2),
+      inset 0 1px 0 rgba(211, 245, 234, 0.3),
+      inset 0 0 0 1.5px rgba(212, 170, 90, 0.2);
+  }
+
+  .sr-card-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at 85% 15%,
+      rgba(147, 112, 238, 0.2) 0%,
+      transparent 55%
+    );
+    pointer-events: none;
+  }
+
+  /* R: Carved Mahogany & Aged Bronze-Slate Frame */
+  .r-card-glow {
+    position: relative;
+    overflow: hidden;
+    border: 1.5px solid rgba(164, 128, 86, 0.65);
+    background:
+      radial-gradient(
+        90% 60% at 50% 0%,
+        rgba(228, 200, 144, 0.1) 0%,
+        transparent 55%
+      ),
+      linear-gradient(
+        155deg,
+        rgba(38, 33, 32, 0.95) 0%,
+        rgba(23, 26, 34, 0.97) 100%
+      );
+    box-shadow:
+      0 5px 14px rgba(5, 8, 14, 0.55),
+      inset 0 1px 0 rgba(240, 212, 158, 0.2),
+      inset 0 0 0 1px rgba(148, 114, 78, 0.22);
+  }
+}
+
+/* ============================================================
+   Animation Utility Classes
+   ============================================================ */
+
+@layer utilities {
+  .animate-float-slow {
+    animation: floatSlow 4.2s ease-in-out infinite;
+  }
+
+  .animate-pulse-gold {
+    animation: pulseGold 3s ease-in-out infinite;
+  }
+
+  .animate-gacha-reveal {
+    animation: gachaReveal 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-shimmer-sweep {
+    animation: shimmerSweep 3.4s ease-in-out infinite;
+  }
+
+  .animate-march-bob {
+    animation: marchBob 0.72s ease-in-out infinite;
+  }
+
+  .animate-banner-wave {
+    transform-origin: left center;
+    animation: bannerWave 1.4s ease-in-out infinite;
+  }
+
+  .animate-sword-slash-a {
+    animation: swordSlashA 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-sword-slash-b {
+    animation: swordSlashB 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-siege-shake {
+    animation: siegeShake 0.48s ease-in-out;
+  }
+
+  .animate-conquest-ripple {
+    animation: conquestRipple 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-float-damage {
+    animation: floatDamage 1.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-cutin-slide {
+    animation: cutinSlide 1.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-smoke-rise {
+    animation: smokeRise 1.6s ease-out infinite;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}

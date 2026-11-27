@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>《台灣群雄錄：百區爭霸》10種美術風格審核畫廊</title>
+    <style>
+      :root {
+        --bg: #0c121a;
+        --card: #141e2b;
+        --border: rgba(212, 175, 55, 0.28);
+        --gold: #f0c96b;
+        --text: #f6efe2;
+        --muted: #a9b4c2;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+        background: radial-gradient(circle at top, #172436 0%, var(--bg) 65%);
+        color: var(--text);
+        padding: 28px 24px 64px;
+      }
+      .header {
+        max-width: 1400px;
+        margin: 0 auto 28px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 18px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        color: var(--gold);
+        letter-spacing: 0.04em;
+      }
+      .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .back-btn {
+        color: var(--gold);
+        text-decoration: none;
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: rgba(240, 201, 107, 0.08);
+        font-size: 14px;
+      }
+      .back-btn:hover { background: rgba(240, 201, 107, 0.18); }
+      .grid {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+        gap: 22px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .card:hover {
+        transform: translateY(-3px);
+        border-color: var(--gold);
+      }
+      .img-wrap {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: #080d14;
+        cursor: zoom-in;
+        overflow: hidden;
+      }
+      .img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+      .card:hover .img-wrap img { transform: scale(1.03); }
+      .badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(12, 18, 26, 0.86);
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+      }
+      .placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+        background: repeating-linear-gradient(45deg, #101824, #101824 12px, #162233 12px, #162233 24px);
+        color: var(--muted);
+      }
+      .body { padding: 16px 18px 18px; }
+      .title { margin: 0 0 8px; font-size: 18px; color: #fff; }
+      .meta { margin: 4px 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+      .meta strong { color: var(--gold); }
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 24px;
+        cursor: zoom-out;
+      }
+      .lightbox.open { display: flex; }
+      .lightbox img {
+        max-width: 95vw;
+        max-height: 92vh;
+        border-radius: 10px;
+        border: 1px solid var(--gold);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h1>《台灣群雄錄：百區爭霸》美術風格審核畫廊（10 款提案）</h1>
+        <p class="subtitle">點擊任一張圖片可全螢幕放大檢視細節。審核後請直接告訴我編號（01～10）或混搭需求！</p>
+      </div>
+      <a class="back-btn" href="/">← 返回遊戲試玩</a>
+    </div>
+
+    <div class="grid" id="gallery"></div>
+
+    <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
+      <img id="lightbox-img" src="" alt="放大檢視" />
+    </div>
+
+    <script>
+      const styles = [
+        {
+          id: "01",
+          name: "新國風金箔浮世繪水墨（Ukiyo-e Ink & Gold）",
+          img: "/assets/style-review/style01.jpg",
+          map: "粗獷水墨山脈筆觸＋金箔邊線與朱紅印章，東方大戰略氣勢。",
+          hero: "工筆水墨描邊＋燙金鎧甲光澤。",
+          anim: "水墨筆刷揮砍刀光、朱紅軍旗翻飛、金箔火花爆裂。"
+        },
+        {
+          id: "02",
+          name: "精緻日系二次元動漫風（Modern Anime Cel-Shaded）",
+          img: "/assets/style-review/style02.jpg",
+          map: "明亮高飽和 2.5D 奇幻台灣地圖，梯田與海浪光影通透。",
+          hero: "高顏值日系賽璐璐立繪，SSR 抽卡演出極具吸引力。",
+          anim: "Q 版動漫小兵衝鋒、發光戰術箭頭、必殺技元素爆發特寫。"
+        },
+        {
+          id: "03",
+          name: "台灣廟宇剪黏與皮影戲風（Temple Mosaic & Shadow Puppet）",
+          img: "/assets/style-review/style03.jpg",
+          map: "獨一無二台灣本土工藝！廟宇剪黏瓷片邊框＋燈籠暖光木雕地圖。",
+          hero: "精緻鏤空皮影戲／廟宇彩繪神將質感（八家將、媽祖超對味）。",
+          anim: "關節擺動皮影戲軍陣行軍、符咒火焰拖尾、廟會鑼鼓震波攻城。"
+        },
+        {
+          id: "04",
+          name: "高清像素 HD-2D 復古戰棋風（HD-2D Pixel Art）",
+          img: null,
+          map: "《歧路旅人／三角戰略》式高精細像素台灣地形＋現代移軸景深光暈。",
+          hero: "精緻 16-bit / 32-bit 像素肖像框。",
+          anim: "逐格像素步兵／騎兵／戰船動畫，交鋒跳出復古像素劍氣與傷害數字。"
+        },
+        {
+          id: "05",
+          name: "歐美厚塗奇幻史詩寫實風（Epic Fantasy Oil Painting）",
+          img: "/assets/style-review/style05.jpg",
+          map: "立體浮雕沙盤台灣戰場，寫實山脈、城堡與金色農田（Total War 感）。",
+          hero: "厚塗油畫史詩武將肖像，質感厚重霸氣。",
+          anim: "微縮軍團方陣推進、戰旗飄揚、火砲硝煙與攻城烈焰粒子。"
+        },
+        {
+          id: "06",
+          name: "精緻 Q 版三頭身黏土微縮風（Chibi 3D Clay Diorama）",
+          img: "/assets/style-review/style06.jpg",
+          map: "療癒手工黏土微縮模型台灣島，迷你廟宇、稻田與城堡立體討喜。",
+          hero: "可愛圓潤三頭身 Q 版武將（黑熊、媽祖、廖添丁都很萌）。",
+          anim: "Q 彈小兵跑步冒煙塵、可愛星星碰撞特效，種田攻城輕鬆耐玩。"
+        },
+        {
+          id: "07",
+          name: "台灣賽博民俗霓虹風（Cyber-Folklore Templepunk）",
+          img: "/assets/style-review/style07.jpg",
+          map: "未來賽博龐克結合台灣宮廟文化！全息深藍＋霓虹朱紅戰術網格地圖。",
+          hero: "賽博八家將、霓虹光環媽祖、機械裝甲台灣黑熊。",
+          anim: "霓虹符咒雷射軌跡、全息浮空戰車衝鋒、數位雷電破城特效。"
+        },
+        {
+          id: "08",
+          name: "吉卜力溫暖手繪水彩繪本風（Ghibli Storybook Watercolor）",
+          img: "/assets/style-review/style08.jpg",
+          map: "溫暖陽光手繪水彩與白雲飄浮的翠綠台灣，茶園與漁村充滿生命力。",
+          hero: "溫潤故事繪本風角色立繪，親和力極高。",
+          anim: "手繪帆船渡海、旗幟飄揚的鄉勇隊伍、水彩筆觸攻防火花。"
+        },
+        {
+          id: "09",
+          name: "現代極簡戰術沙盤與兵棋風（Modern Sleek Tactical Wargame）",
+          img: "/assets/style-review/style09.jpg",
+          map: "俐落深岩灰＋鎏金等高線戰術地圖，資訊清晰度最高、質感高檔。",
+          hero: "銳利潮流向量插畫指揮官。",
+          anim: "發光戰術箭頭推進、動態兵棋標記、雷達波紋交戰圈。"
+        },
+        {
+          id: "10",
+          name: "金碧青綠山水古卷軸輿圖風（Imperial Blue-Green Silk Scroll）",
+          img: "/assets/style-review/style10.jpg",
+          map: "致敬《康熙臺灣輿圖》與《千里江山圖》青綠山水！古絹底紋＋金碧城池。",
+          hero: "精緻宮廷工筆畫人物立繪，典雅大氣。",
+          anim: "古畫戰船乘浪、金繡軍旗沿古道進軍、墨金雲氣交鋒爆裂。"
+        }
+      ];
+
+      const gallery = document.getElementById("gallery");
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = document.getElementById("lightbox-img");
+
+      styles.forEach((s) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="img-wrap">
+            <span class="badge">風格 ${s.id}</span>
+            ${
+              s.img
+                ? `<img src="${s.img}" alt="風格 ${s.id}" loading="lazy" />`
+                : `<div class="placeholder"><strong>風格 04：HD-2D 像素風</strong><br/><br/>繪圖模型於第 10 張觸及單日額度上限（約 4.5 小時後重置），此格先以規格說明呈現；若選定此風格，我們可直接於前端以像素美術＋景深著色器實作。</div>`
+            }
+          </div>
+          <div class="body">
+            <h2 class="title">風格 ${s.id}：${s.name}</h2>
+            <p class="meta"><strong>🗺️ 地圖：</strong>${s.map}</p>
+            <p class="meta"><strong>🎴 人物：</strong>${s.hero}</p>
+            <p class="meta"><strong>⚔️ 動畫：</strong>${s.anim}</p>
+          </div>
+        `;
+        if (s.img) {
+          card.querySelector(".img-wrap").addEventListener("click", () => {
+            lightboxImg.src = s.img;
+            lightbox.classList.add("open");
+          });
+        }
+        gallery.appendChild(card);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>《台灣群雄錄：百區爭霸》AI 手繪油畫地圖 5 大版面審核</title>
+    <style>
+      :root {
+        --bg: #0b1118;
+        --panel: #131d29;
+        --gold: #f0c96b;
+        --border: rgba(240, 201, 107, 0.28);
+        --text: #f5efe2;
+        --muted: #a6b4c4;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+        background: radial-gradient(circle at top, #182636 0%, var(--bg) 70%);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 20px;
+        background: rgba(11, 17, 24, 0.92);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(8px);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--gold);
+        letter-spacing: 0.04em;
+      }
+      .brand p {
+        margin: 2px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+      }
+      .tab-btn {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.16s ease;
+      }
+      .tab-btn:hover { border-color: var(--gold); color: var(--gold); }
+      .tab-btn.active {
+        background: linear-gradient(135deg, #c89632, #8f6218);
+        border-color: #ffe399;
+        color: #fff;
+        box-shadow: 0 0 16px rgba(240, 201, 107, 0.35);
+      }
+      .tab-btn.overview {
+        border-color: rgba(94, 211, 178, 0.45);
+        color: #9be8d2;
+      }
+      .tab-btn.overview.active {
+        background: linear-gradient(135deg, #1f7a62, #145443);
+        color: #fff;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .ctrl-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: var(--text);
+        padding: 6px 11px;
+        border-radius: 7px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .ctrl-btn:hover { border-color: var(--gold); color: var(--gold); }
+      .toggle-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+        cursor: pointer;
+        user-select: none;
+        padding: 4px 8px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .main-stage {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px 20px 28px;
+      }
+      .edition-banner {
+        width: 100%;
+        max-width: 920px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 10px 16px;
+        border-radius: 10px;
+        background: rgba(19, 29, 41, 0.85);
+        border: 1px solid var(--border);
+      }
+      .edition-banner h2 { margin: 0; font-size: 16px; color: var(--gold); }
+      .edition-banner p { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
+      .zoom-hint {
+        font-size: 12px;
+        color: #fde68a;
+        background: rgba(240, 201, 107, 0.12);
+        border: 1px solid rgba(240, 201, 107, 0.35);
+        padding: 4px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .viewport {
+        width: min(86vh, 920px);
+        aspect-ratio: 1 / 1;
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        border: 2px solid var(--border);
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+        background: #0b1926;
+        user-select: none;
+      }
+      .viewport.pannable { cursor: grab; }
+      .viewport.pannable.dragging { cursor: grabbing; }
+      .map-layer {
+        width: 100%;
+        height: 100%;
+        transform-origin: center center;
+        position: relative;
+        will-change: transform;
+      }
+      .map-layer img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        pointer-events: none;
+      }
+      .map-overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .overview-grid {
+        width: 100%;
+        max-width: 1440px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 20px;
+      }
+      .overview-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .overview-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--gold);
+      }
+      .overview-thumb {
+        aspect-ratio: 1 / 1;
+        position: relative;
+        overflow: hidden;
+        background: #08121c;
+      }
+      .overview-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .overview-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(11, 17, 24, 0.88);
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+      .overview-body { padding: 14px 16px; }
+      .overview-body h3 { margin: 0 0 5px; font-size: 16px; color: #fff; }
+      .overview-body p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <h1>《台灣群雄錄：百區爭霸》AI 真實手繪油畫地圖 — 5 大版面審核</h1>
+        <p>高解析 AI 油畫底圖 ＋ 黑色虛線行政劃分 ＋ 在地地標示範｜100% 置中鎖定，放大後可拖曳移動</p>
+      </div>
+      <div class="tabs" id="tabs"></div>
+      <div class="controls">
+        <label class="toggle-label">
+          <input type="checkbox" id="toggle-overlay" checked />
+          顯示黑色虛線與地標示範
+        </label>
+        <button class="ctrl-btn" id="btn-zoom-out">－</button>
+        <button class="ctrl-btn" id="btn-reset">100%</button>
+        <button class="ctrl-btn" id="btn-zoom-in">＋</button>
+        <a class="ctrl-btn" href="/" style="text-decoration: none;">返回遊戲</a>
+      </div>
+    </header>
+
+    <main class="main-stage">
+      <div class="edition-banner" id="edition-banner">
+        <div>
+          <h2 id="ed-title"></h2>
+          <p id="ed-desc"></p>
+        </div>
+        <span class="zoom-hint" id="zoom-status">縮放 100%（置中鎖定）</span>
+      </div>
+
+      <div class="viewport" id="viewport">
+        <div class="map-layer" id="map-layer">
+          <img id="map-img" src="" alt="AI 手繪台灣海峽油畫地圖" />
+          <svg class="map-overlay" id="map-overlay" viewBox="0 0 1000 1000"></svg>
+        </div>
+      </div>
+
+      <div class="overview-grid hidden" id="overview-grid"></div>
+    </main>
+
+    <script>
+      const EDITIONS = [
+        {
+          id: "5A",
+          tab: "版面 1：黃金夕陽原畫",
+          title: "版面 1（風格 5-A）：AI 黃金夕陽油畫原畫版（無字純淨原圖）",
+          desc: "AI 畫師直接手繪之 1:1 俯視油畫底圖：暖金夕陽照耀福建沿海與台灣海峽、中央山脈雪峰與深松綠陰影、西部金色弧形梯田與深藍青太平洋。",
+          img: "/assets/map-editions/map_golden.jpg",
+          filter: "none",
+          preset: "golden"
+        },
+        {
+          id: "5B",
+          tab: "版面 2：晴空翠綠原畫",
+          title: "版面 2（風格 5-B）：AI 盛夏晴空翠綠油畫原畫版",
+          desc: "第二張獨立 AI 手繪油畫底圖：清澈湛藍海峽與碧綠珊瑚淺灘、翠綠立體中央山脈與青蔥福建沿海丘陵，整體明亮清晰度最高。",
+          img: "/assets/map-editions/map_emerald.jpg",
+          filter: "none",
+          preset: "emerald"
+        },
+        {
+          id: "5C",
+          tab: "版面 3：1949 戰火暮色",
+          title: "版面 3（風格 5-C）：1949 戰火暮色電影厚塗版",
+          desc: "以 AI 黃金夕陽油畫原圖進行電影級琥珀銅暮色調光，強化 1949 年台海戰情室厚重史詩張力與暖燈光對比。",
+          img: "/assets/map-editions/map_golden.jpg",
+          filter: "contrast(1.16) saturate(1.18) sepia(0.26) hue-rotate(-10deg) brightness(0.92)",
+          preset: "golden"
+        },
+        {
+          id: "5D",
+          tab: "版面 4：晨霧青綠山水",
+          title: "版面 4（風格 5-D）：晨霧青綠山水油畫版",
+          desc: "以 AI 晴空翠綠油畫原圖調和礦物青綠與晨霧銀光色階，呈現溫潤典雅的東方青綠山水結合西方厚塗浮雕質感。",
+          img: "/assets/map-editions/map_emerald.jpg",
+          filter: "contrast(0.95) saturate(0.84) hue-rotate(12deg) brightness(1.04)",
+          preset: "emerald"
+        },
+        {
+          id: "5E",
+          tab: "版面 5：古典羊皮紙輿圖",
+          title: "版面 5（風格 5-E）：1949 古典羊皮紙浮雕沙盤版",
+          desc: "將 AI 油畫原圖轉為仿古參謀部羊皮紙鎏金立體沙盤色調，黑色虛線行政劃分與彩色在地地標的辨識度最高。",
+          img: "/assets/map-editions/map_golden.jpg",
+          filter: "sepia(0.52) contrast(1.08) saturate(0.78) brightness(1.03)",
+          preset: "golden"
+        }
+      ];
+
+      // Sample aligned black dashed borders & enlarged local landmarks for previewing how UI overlays sit on the AI oil painting
+      const OVERLAY_PRESETS = {
+        golden: {
+          dividers: [
+            // Taiwan county dashed borders (aligned to map_golden.jpg)
+            "M 790 198 L 860 228 L 910 218",
+            "M 745 245 L 828 286 L 916 250",
+            "M 702 315 L 792 342 L 882 325",
+            "M 646 392 L 758 412 L 865 398",
+            "M 605 462 L 732 478 L 838 468",
+            "M 578 538 L 710 548 L 818 542",
+            "M 556 618 L 690 622 L 792 615",
+            "M 575 702 L 682 702 L 762 695",
+            "M 618 776 L 695 776 L 738 770",
+            "M 785 268 L 755 395 L 730 535 L 695 695",
+            // Mainland SE coastal block dividers (aligned to map_golden.jpg)
+            "M 270 10 L 375 112",
+            "M 140 85 L 285 215",
+            "M 55 215 L 210 320",
+            "M 15 365 L 125 430"
+          ],
+          labels: [
+            { name: "台北", landmark: "🏛️ 總統府", x: 848, y: 175 },
+            { name: "台中", landmark: "🏯 湖心亭", x: 702, y: 378 },
+            { name: "彰化", landmark: "🪷 八卦山大佛", x: 632, y: 452 },
+            { name: "嘉義", landmark: "🌲 阿里山", x: 628, y: 552 },
+            { name: "台南", landmark: "🏯 赤崁樓", x: 604, y: 635, highlight: true },
+            { name: "高雄", landmark: "🏰 英國領事館", x: 628, y: 722 },
+            { name: "屏東", landmark: "🗼 鵝鑾鼻", x: 688, y: 825 },
+            { name: "花蓮", landmark: "⛩️ 太魯閣", x: 838, y: 448 },
+            { name: "台東", landmark: "🌉 三仙台", x: 766, y: 655 },
+            { name: "澎湖", landmark: "💚 雙心石滬", x: 442, y: 530 },
+            { name: "金門", landmark: "🏯 莒光樓", x: 256, y: 315 },
+            { name: "馬祖", landmark: "🗼 東引燈塔", x: 495, y: 85 },
+            { name: "福州", mainland: true, x: 355, y: 55 },
+            { name: "泉州", mainland: true, x: 240, y: 165 },
+            { name: "廈門", mainland: true, x: 155, y: 278 },
+            { name: "漳州", mainland: true, x: 82, y: 385 }
+          ],
+          marchLand: { x1: 604, y1: 635, x2: 628, y2: 552 },
+          marchSea: { x1: 604, y1: 635, x2: 442, y2: 530 }
+        },
+        emerald: {
+          dividers: [
+            "M 768 278 L 838 308 L 882 292",
+            "M 720 338 L 806 372 L 872 348",
+            "M 668 415 L 772 442 L 848 426",
+            "M 615 492 L 742 512 L 826 498",
+            "M 578 575 L 712 588 L 800 578",
+            "M 556 655 L 686 662 L 774 652",
+            "M 588 738 L 678 738 L 742 732",
+            "M 758 355 L 732 485 L 705 625 L 676 742",
+            "M 310 15 L 448 118",
+            "M 190 120 L 368 238",
+            "M 85 255 L 256 368",
+            "M 25 430 L 175 512"
+          ],
+          labels: [
+            { name: "台北", landmark: "🏛️ 總統府", x: 824, y: 258 },
+            { name: "台中", landmark: "🏯 湖心亭", x: 675, y: 458 },
+            { name: "彰化", landmark: "🪷 八卦山大佛", x: 616, y: 528 },
+            { name: "嘉義", landmark: "🌲 阿里山", x: 608, y: 608 },
+            { name: "台南", landmark: "🏯 赤崁樓", x: 598, y: 682, highlight: true },
+            { name: "高雄", landmark: "🏰 英國領事館", x: 625, y: 762 },
+            { name: "屏東", landmark: "🗼 鵝鑾鼻", x: 684, y: 848 },
+            { name: "花蓮", landmark: "⛩️ 太魯閣", x: 808, y: 518 },
+            { name: "台東", landmark: "🌉 三仙台", x: 742, y: 695 },
+            { name: "澎湖", landmark: "💚 雙心石滬", x: 465, y: 562 },
+            { name: "金門", landmark: "🏯 莒光樓", x: 282, y: 382 },
+            { name: "馬祖", landmark: "🗼 東引燈塔", x: 548, y: 48 },
+            { name: "福州", mainland: true, x: 375, y: 65 },
+            { name: "泉州", mainland: true, x: 270, y: 195 },
+            { name: "廈門", mainland: true, x: 185, y: 330 },
+            { name: "漳州", mainland: true, x: 105, y: 472 }
+          ],
+          marchLand: { x1: 598, y1: 682, x2: 608, y2: 608 },
+          marchSea: { x1: 598, y1: 682, x2: 465, y2: 562 }
+        }
+      };
+
+      function buildOverlaySvg(presetKey) {
+        const p = OVERLAY_PRESETS[presetKey];
+        const parts = [];
+
+        // Crisp black dashed dividers with subtle light underlay so they pop cleanly on oil terrain
+        p.dividers.forEach((d) => {
+          parts.push(`<path d="${d}" fill="none" stroke="rgba(255,250,235,0.42)" stroke-width="2.6" stroke-dasharray="6 5" stroke-linecap="round"/>`);
+          parts.push(`<path d="${d}" fill="none" stroke="#141414" stroke-width="1.6" stroke-dasharray="6 5" stroke-linecap="round"/>`);
+        });
+
+        // Sample land army route & sea warship route
+        const ml = p.marchLand;
+        parts.push(`<line x1="${ml.x1}" y1="${ml.y1}" x2="${ml.x2}" y2="${ml.y2}" stroke="#dc2626" stroke-width="3" stroke-dasharray="6 4"/>`);
+        const lx = (ml.x1 + ml.x2) / 2, ly = (ml.y1 + ml.y2) / 2;
+        parts.push(`<g transform="translate(${lx},${ly})">
+          <circle r="15" fill="#991b1b" stroke="#fde68a" stroke-width="2"/>
+          <text y="5" text-anchor="middle" font-size="16">⚔️</text>
+        </g>`);
+
+        const ms = p.marchSea;
+        parts.push(`<path d="M ${ms.x1} ${ms.y1} Q ${(ms.x1 + ms.x2) / 2} ${(ms.y1 + ms.y2) / 2 - 22} ${ms.x2} ${ms.y2}" fill="none" stroke="#38bdf8" stroke-width="2.6" stroke-dasharray="6 5"/>`);
+        const sx = (ms.x1 + ms.x2) / 2, sy = (ms.y1 + ms.y2) / 2 - 11;
+        parts.push(`<g transform="translate(${sx},${sy})">
+          <circle r="15" fill="#0c4a6e" stroke="#bae6fd" stroke-width="2"/>
+          <text y="5" text-anchor="middle" font-size="16">⛵</text>
+        </g>`);
+
+        // Enlarged county labels & local landmark badges
+        p.labels.forEach((l) => {
+          if (l.mainland) {
+            parts.push(`
+              <text x="${l.x}" y="${l.y}" text-anchor="middle" font-size="17" font-weight="800"
+                fill="#1f1b14" stroke="rgba(255,248,230,0.85)" stroke-width="4" paint-order="stroke">${l.name}</text>
+            `);
+          } else {
+            const pillBg = l.highlight ? "rgba(180,35,24,0.9)" : "rgba(15,23,35,0.82)";
+            const pillBorder = l.highlight ? "#fde68a" : "rgba(255,255,255,0.45)";
+            parts.push(`
+              <g transform="translate(${l.x},${l.y})">
+                <rect x="-46" y="-26" width="92" height="22" rx="11" fill="${pillBg}" stroke="${pillBorder}" stroke-width="1.3"/>
+                <text y="-11" text-anchor="middle" font-size="12" font-weight="700" fill="#fef3c7">${l.landmark}</text>
+                <text y="13" text-anchor="middle" font-size="17" font-weight="900"
+                  fill="#ffffff" stroke="#0c121a" stroke-width="4.5" paint-order="stroke">${l.name}</text>
+              </g>
+            `);
+          }
+        });
+        return parts.join("");
+      }
+
+      let currentIndex = 0;
+      let overviewMode = false;
+      let zoom = 1;
+      let pan = { x: 0, y: 0 };
+      let dragging = false;
+      let dragStart = { x: 0, y: 0, panX: 0, panY: 0 };
+
+      const tabsEl = document.getElementById("tabs");
+      const edTitle = document.getElementById("ed-title");
+      const edDesc = document.getElementById("ed-desc");
+      const zoomStatus = document.getElementById("zoom-status");
+      const viewport = document.getElementById("viewport");
+      const mapLayer = document.getElementById("map-layer");
+      const mapImg = document.getElementById("map-img");
+      const mapOverlay = document.getElementById("map-overlay");
+      const overviewGrid = document.getElementById("overview-grid");
+      const editionBanner = document.getElementById("edition-banner");
+      const toggleOverlay = document.getElementById("toggle-overlay");
+
+      function applyTransform() {
+        if (zoom <= 1) {
+          zoom = 1;
+          pan = { x: 0, y: 0 };
+        } else {
+          const maxPan = ((zoom - 1) * viewport.clientWidth) / 2;
+          pan.x = Math.max(-maxPan, Math.min(maxPan, pan.x));
+          pan.y = Math.max(-maxPan, Math.min(maxPan, pan.y));
+        }
+        mapLayer.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`;
+        viewport.classList.toggle("pannable", zoom > 1);
+        document.getElementById("btn-reset").textContent = `${Math.round(zoom * 100)}%`;
+        zoomStatus.textContent =
+          zoom > 1
+            ? `縮放 ${Math.round(zoom * 100)}%（可拖曳移動）`
+            : "縮放 100%（置中鎖定）";
+      }
+
+      function renderCurrent() {
+        const ed = EDITIONS[currentIndex];
+        edTitle.textContent = ed.title;
+        edDesc.textContent = ed.desc;
+        mapImg.src = ed.img;
+        mapImg.style.filter = ed.filter;
+        mapOverlay.innerHTML = buildOverlaySvg(ed.preset);
+        mapOverlay.classList.toggle("hidden", !toggleOverlay.checked);
+
+        viewport.classList.toggle("hidden", overviewMode);
+        editionBanner.classList.toggle("hidden", overviewMode);
+        overviewGrid.classList.toggle("hidden", !overviewMode);
+
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          const idx = btn.dataset.idx;
+          if (idx === "overview") btn.classList.toggle("active", overviewMode);
+          else btn.classList.toggle("active", !overviewMode && Number(idx) === currentIndex);
+        });
+        applyTransform();
+      }
+
+      // Build tabs
+      EDITIONS.forEach((ed, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "tab-btn";
+        btn.dataset.idx = String(idx);
+        btn.textContent = ed.tab;
+        btn.onclick = () => {
+          overviewMode = false;
+          currentIndex = idx;
+          renderCurrent();
+        };
+        tabsEl.appendChild(btn);
+      });
+      const ovBtn = document.createElement("button");
+      ovBtn.className = "tab-btn overview";
+      ovBtn.dataset.idx = "overview";
+      ovBtn.textContent = "五版並列總覽";
+      ovBtn.onclick = () => {
+        overviewMode = true;
+        renderCurrent();
+      };
+      tabsEl.appendChild(ovBtn);
+
+      // Build overview cards
+      EDITIONS.forEach((ed, idx) => {
+        const card = document.createElement("div");
+        card.className = "overview-card";
+        card.innerHTML = `
+          <div class="overview-thumb">
+            <img src="${ed.img}" style="filter:${ed.filter}" alt="${ed.title}" />
+            <span class="overview-badge">${ed.tab}</span>
+          </div>
+          <div class="overview-body">
+            <h3>${ed.title}</h3>
+            <p>${ed.desc}</p>
+          </div>
+        `;
+        card.onclick = () => {
+          overviewMode = false;
+          currentIndex = idx;
+          zoom = 1;
+          renderCurrent();
+        };
+        overviewGrid.appendChild(card);
+      });
+
+      // Zoom & pan handlers
+      document.getElementById("btn-zoom-in").onclick = () => {
+        zoom = Math.min(2.6, +(zoom + 0.25).toFixed(2));
+        applyTransform();
+      };
+      document.getElementById("btn-zoom-out").onclick = () => {
+        zoom = Math.max(1, +(zoom - 0.25).toFixed(2));
+        applyTransform();
+      };
+      document.getElementById("btn-reset").onclick = () => {
+        zoom = 1;
+        pan = { x: 0, y: 0 };
+        applyTransform();
+      };
+      toggleOverlay.onchange = () => {
+        mapOverlay.classList.toggle("hidden", !toggleOverlay.checked);
+      };
+
+      viewport.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.18 : -0.18;
+        zoom = Math.max(1, Math.min(2.6, +(zoom + delta).toFixed(2)));
+        applyTransform();
+      }, { passive: false });
+
+      viewport.addEventListener("mousedown", (e) => {
+        if (zoom <= 1) return;
+        dragging = true;
+        viewport.classList.add("dragging");
+        dragStart = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        pan.x = dragStart.panX + (e.clientX - dragStart.x);
+        pan.y = dragStart.panY + (e.clientY - dragStart.y);
+        applyTransform();
+      });
+      window.addEventListener("mouseup", () => {
+        dragging = false;
+        viewport.classList.remove("dragging");
+      });
+
+      renderCurrent();
+    </script>
+  </body>
+</html>
